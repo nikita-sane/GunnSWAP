@@ -1,105 +1,153 @@
-import java.util.ArrayList;
-import java.util.Scanner;
+class Account {
+    constructor(name, id, credits) {
+        this.name = name;
+        this.id = id;
+        this.credits = credits;
+        this.itemsSold = [];
+    }
 
-public class Main {
+    getName() {
+        return this.name;
+    }
 
-	static ArrayList<Account> people;
-	static ArrayList<Item> allItems = new ArrayList<Item>();
-	static Account person = new Account("default", 950, 0);
+    getCredits() {
+        return this.credits;
+    }
 
-	public static void main(String[] args) {
-		people =  new ArrayList<Account>();
-		Account nikita = new Account("nikita", 95032924, 50);
-		people.add(nikita);
-		Account melinda = new Account("melinda", 95039846, 20);
-		people.add(melinda);
-		Account olivia = new Account("olivia", 95034422, 100);
-		people.add(olivia);
-		manageTasks();
+    getId() {
+        return this.id;
+    }
 
-	}
+    printItemsSold() {
+        for (let i = 0; i < this.itemsSold.length; i++) {
+            console.log(this.itemsSold[i].getItemName());
+        }
+    }
 
-	public static void getPeople() {
-		for (int i = 0; i < people.size(); i ++) { 
-			System.out.println("Name: " + people.get(i).getName());
-			System.out.println("Credits: " + people.get(i).getCredits());
-			System.out.println();
-		}
-	}
+    sellItem(item) {
+        this.itemsSold.push(item);
+        this.credits += item.getPrice();
+    }
 
-	public static void getAllItems() {
-		for (int i = 0; i < allItems.size(); i ++) { 
-			System.out.print(allItems.get(i).getItemName() + ", ");
-		}
-		System.out.println();
-		System.out.println();
-	}
-
-	public static void manageTasks() {
-		Scanner scn;
-		scn = new Scanner(System.in);
-		try {
-			while (2 < 3) {
-				System.out.print("Enter ID Number: ");
-				String userIdNum = scn.nextLine();
-				int idNum =  Integer.parseInt(userIdNum);
-				for (int j = 0; j < people.size(); j ++) {
-					if (people.get(j).getId() == idNum) {
-						person = people.get(j);
-					}
-				}
-				while (2 < 3) {
-					System.out.println("[1] Show account details");
-					System.out.println("[2] Sell");
-					System.out.println("[3] Buy");
-					System.out.println("[4] Quit");
-					System.out.print("Selection: ");
-					String task = scn.nextLine();
-
-					if (task.equals("1")) {
-						System.out.println("Name: " + person.getName());
-						System.out.println("Credits Available" + person.getCredits());
-						System.out.println("Items Sold: ");
-						System.out.println();
-						person.printItemsSold();
-					}
-
-					else if (task.equals("2")) {
-						System.out.println("Item price: ");
-						String price = scn.nextLine();
-						System.out.println("Item name: ");
-						String name = scn.nextLine();
-						System.out.println("Item description: ");
-						String description = scn.nextLine();
-						int priceInt = Integer.parseInt(price);
-						Item clothing = new Item(priceInt, name, description, allItems.size());
-						person.sellItem(clothing);
-					}
-
-					else if (task.equals("3")) {
-						System.out.println("Item index: ");
-						String index = scn.nextLine();
-						int ind = Integer.parseInt(index);
-						for (int i = 0; i < allItems.size(); i ++) {
-							if (allItems.get(i).getIndex() == ind) {
-								person.buyItem(allItems.get(i));
-							}
-						}
-					}
-					else if (task.equals("4")) {
-						break;
-					}
-					else {
-						System.out.println("Unknown request!");
-					}
-				}
-			}
-		}
-		finally {
-			scn.close();
-		}
-
-	}
-
+    buyItem(item) {
+        const index = this.itemsSold.indexOf(item);
+        if (index !== -1) {
+            this.itemsSold.splice(index, 1);
+            this.credits -= item.getPrice();
+        }
+    }
 }
 
+class Item {
+    constructor(price, itemName, description, index) {
+        this.price = price;
+        this.itemName = itemName;
+        this.description = description;
+        this.index = index;
+    }
+
+    getPrice() {
+        return this.price;
+    }
+
+    getItemName() {
+        return this.itemName;
+    }
+
+    getDescription() {
+        return this.description;
+    }
+
+    getIndex() {
+        return this.index;
+    }
+}
+
+const people = [];
+const allItems = [];
+let person = new Account("default", 950, 0);
+
+function getPeople() {
+    for (let i = 0; i < people.length; i++) {
+        console.log("Name: " + people[i].getName());
+        console.log("Credits: " + people[i].getCredits());
+        console.log();
+    }
+}
+
+function getAllItems() {
+    for (let i = 0; i < allItems.length; i++) {
+        console.log(allItems[i].getItemName() + ", ");
+    }
+    console.log();
+}
+
+function manageTasks() {
+    const readline = require('readline');
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    try {
+        while (true) {
+            console.log("Enter ID Number: ");
+            rl.question("Enter ID Number: ", (userIdNum) => {
+                const idNum = parseInt(userIdNum);
+                for (let j = 0; j < people.length; j++) {
+                    if (people[j].getId() === idNum) {
+                        person = people[j];
+                    }
+                }
+
+                while (true) {
+                    console.log("[1] Show account details");
+                    console.log("[2] Sell");
+                    console.log("[3] Buy");
+                    console.log("[4] Quit");
+                    rl.question("Selection: ", (task) => {
+                        if (task === "1") {
+                            console.log("Name: " + person.getName());
+                            console.log("Credits Available" + person.getCredits());
+                            console.log("Items Sold: ");
+                            console.log();
+                            person.printItemsSold();
+                        } else if (task === "2") {
+                            rl.question("Item price: ", (price) => {
+                                rl.question("Item name: ", (name) => {
+                                    rl.question("Item description: ", (description) => {
+                                        const priceInt = parseInt(price);
+                                        const clothing = new Item(priceInt, name, description, allItems.length);
+                                        person.sellItem(clothing);
+                                    });
+                                });
+                            });
+                        } else if (task === "3") {
+                            rl.question("Item index: ", (index) => {
+                                const ind = parseInt(index);
+                                for (let i = 0; i < allItems.length; i++) {
+                                    if (allItems[i].getIndex() === ind) {
+                                        person.buyItem(allItems[i]);
+                                    }
+                                }
+                            });
+                        } else if (task === "4") {
+                            rl.close();
+                        } else {
+                            console.log("Unknown request!");
+                        }
+                    });
+                }
+            });
+        }
+    } finally {
+        rl.close();
+    }
+}
+
+// Initial data setup
+people.push(new Account("nikita", 95032924, 50));
+people.push(new Account("melinda", 95039846, 20));
+people.push(new Account("olivia", 95034422, 100));
+
+manageTasks();
